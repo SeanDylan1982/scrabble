@@ -1,4 +1,4 @@
-import { RequestHandler } from "express";
+import { RequestHandler } from 'express';
 import {
   LobbyListResponse,
   LobbyRoom,
@@ -9,15 +9,15 @@ import {
   JoinRoomResponse,
   LeaveRoomRequest,
   StartRoomRequest,
-} from "@shared/api";
+} from '@shared/api';
 
-import { pool, uid } from "../db";
+import { getPool, uid } from '../db';
+import { initGameForRoom } from './game';
 
-function nowIso() {
-  return new Date().toISOString();
-}
+function nowIso() { return new Date().toISOString(); }
 
 export const listRooms: RequestHandler = async (_req, res) => {
+  const pool = getPool();
   const { rows } = await pool.query(
     `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]') as players
      from rooms r left join room_players p on p.room_id = r.id
@@ -30,6 +30,7 @@ export const listRooms: RequestHandler = async (_req, res) => {
 };
 
 export const getRoom: RequestHandler = async (req, res) => {
+  const pool = getPool();
   const id = req.params.id;
   const { rows } = await pool.query(
     `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]') as players
@@ -45,6 +46,7 @@ export const getRoom: RequestHandler = async (req, res) => {
 };
 
 export const createRoom: RequestHandler = async (req, res) => {
+  const pool = getPool();
   const body = req.body as CreateRoomRequest;
   if (!body?.name || !body?.playerName) return res.status(400).json({ error: 'Missing name or playerName' });
 
@@ -63,6 +65,7 @@ export const createRoom: RequestHandler = async (req, res) => {
 };
 
 export const joinRoom: RequestHandler = async (req, res) => {
+  const pool = getPool();
   const id = req.params.id;
   const body = req.body as JoinRoomRequest;
   if (!body?.playerName) return res.status(400).json({ error: 'Missing playerName' });
@@ -87,6 +90,7 @@ export const joinRoom: RequestHandler = async (req, res) => {
 };
 
 export const leaveRoom: RequestHandler = async (req, res) => {
+  const pool = getPool();
   const id = req.params.id;
   const body = req.body as LeaveRoomRequest;
   if (!body?.playerId) return res.status(400).json({ error: 'Missing playerId' });
@@ -118,9 +122,8 @@ export const leaveRoom: RequestHandler = async (req, res) => {
   res.json({ room });
 };
 
-import { initGameForRoom } from "./game";
-
 export const startRoom: RequestHandler = async (req, res) => {
+  const pool = getPool();
   const id = req.params.id;
   const body = req.body as StartRoomRequest;
   if (!body?.playerId) return res.status(400).json({ error: 'Missing playerId' });
@@ -133,6 +136,6 @@ export const startRoom: RequestHandler = async (req, res) => {
   await pool.query("update rooms set status='started' where id=$1", [id]);
 
   const room: LobbyRoom = { id, name: roomRow.name, status: 'started', createdAt: roomRow.created_at, players: players.map((p:any)=>({id:p.id,name:p.name,isHost:p.is_host})), hostId: roomRow.host_id, maxPlayers: roomRow.max_players };
-  try { const { initGameForRoom } = await import('./game'); initGameForRoom(room); } catch (e:any) { return res.status(400).json({ error: e.message }); }
+  try { initGameForRoom(room); } catch (e:any) { return res.status(400).json({ error: e.message }); }
   res.json({ room });
 };
