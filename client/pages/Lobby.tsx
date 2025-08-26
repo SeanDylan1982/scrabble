@@ -176,7 +176,7 @@ export default function Lobby() {
                           </div>
                           <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
                             <Users className="w-4 h-4" />
-                            {room.players.length} / {room.maxPlayers}
+                            {(room.players?.length ?? 0)} / {room.maxPlayers}
                           </div>
                         </div>
                         <div className="flex gap-2">
@@ -198,7 +198,7 @@ export default function Lobby() {
 
                       {/* Players */}
                       <div className="flex items-center gap-2 mt-3 flex-wrap">
-                        {room.players.map((p) => (
+                        {(room.players ?? []).map((p) => (
                           <span
                             key={p.id}
                             className="px-2 py-1 text-xs rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1"
