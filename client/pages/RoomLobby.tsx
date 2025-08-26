@@ -28,13 +28,15 @@ export default function RoomLobby() {
   };
 
   const fetchRoom = async (silent = false) => {
-    if (!roomId || document.visibilityState === 'hidden') return;
+    if (!roomId || document.visibilityState === "hidden") return;
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
     try {
       if (!silent) setLoading(true);
-      const res = await fetch(`/api/lobby/rooms/${roomId}`, { signal: controller.signal });
+      const res = await fetch(`/api/lobby/rooms/${roomId}`, {
+        signal: controller.signal,
+      });
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       if (data?.room) setRoom(data.room);
@@ -51,14 +53,14 @@ export default function RoomLobby() {
   useEffect(() => {
     let mounted = true;
     const onVis = () => {
-      if (document.visibilityState === 'visible') schedule(0);
+      if (document.visibilityState === "visible") schedule(0);
       else abortRef.current?.abort();
     };
-    document.addEventListener('visibilitychange', onVis);
+    document.addEventListener("visibilitychange", onVis);
     fetchRoom(false);
     return () => {
       mounted = false;
-      document.removeEventListener('visibilitychange', onVis);
+      document.removeEventListener("visibilitychange", onVis);
       abortRef.current?.abort();
       if (timerRef.current) window.clearTimeout(timerRef.current);
     };
