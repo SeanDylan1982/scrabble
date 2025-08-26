@@ -46,8 +46,13 @@ export const listRooms: RequestHandler = async (_req, res) => {
 };
 
 export const getRoom: RequestHandler = async (req, res) => {
-  const pool = getPool();
   const id = req.params.id;
+  const pool = tryGetPool();
+  if (!pool) {
+    const room = memRooms.get(id);
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+    return res.json({ room });
+  }
   const { rows } = await pool.query(
     `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]'::json) as players
      from rooms r left join room_players p on p.room_id = r.id
