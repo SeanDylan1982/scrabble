@@ -21,7 +21,11 @@ function nowIso() {
 const memRooms = new Map<string, LobbyRoom>();
 
 export const listRooms: RequestHandler = async (_req, res) => {
-  const pool = getPool();
+  const pool = tryGetPool();
+  if (!pool) {
+    const rooms = Array.from(memRooms.values()).sort((a,b)=>a.createdAt < b.createdAt ? 1 : -1);
+    return res.json({ rooms } as LobbyListResponse);
+  }
   const { rows } = await pool.query(
     `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]') as players
      from rooms r left join room_players p on p.room_id = r.id
