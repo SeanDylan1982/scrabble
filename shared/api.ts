@@ -12,7 +12,7 @@ export interface DemoResponse {
 }
 
 // Lobby types
-export type RoomStatus = 'waiting' | 'started' | 'finished';
+export type RoomStatus = "waiting" | "started" | "finished";
 
 export interface LobbyPlayer {
   id: string;

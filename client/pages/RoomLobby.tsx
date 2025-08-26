@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { LobbyRoom } from '@shared/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, Crown, Loader2, Play, Share2, Users } from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { LobbyRoom } from "@shared/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Copy, Crown, Loader2, Play, Share2, Users } from "lucide-react";
 
 export default function RoomLobby() {
   const { roomId } = useParams();
@@ -13,8 +13,8 @@ export default function RoomLobby() {
   const [joining, setJoining] = useState(false);
   const navigate = useNavigate();
 
-  const playerId = localStorage.getItem('playerId') || '';
-  const playerName = localStorage.getItem('playerName') || '';
+  const playerId = localStorage.getItem("playerId") || "";
+  const playerName = localStorage.getItem("playerName") || "";
 
   const isHost = room?.hostId === playerId;
 
@@ -44,9 +44,9 @@ export default function RoomLobby() {
   const handleStart = async () => {
     if (!roomId) return;
     const res = await fetch(`/api/lobby/rooms/${roomId}/start`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerId }),
     });
     if (res.ok) navigate(`/game/${roomId}`);
   };
@@ -55,12 +55,12 @@ export default function RoomLobby() {
     if (!roomId || !playerName) return;
     setJoining(true);
     const res = await fetch(`/api/lobby/rooms/${roomId}/join`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerName })
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ playerName }),
     });
     const data = await res.json();
-    if (data?.player?.id) localStorage.setItem('playerId', data.player.id);
+    if (data?.player?.id) localStorage.setItem("playerId", data.player.id);
     setJoining(false);
     fetchRoom();
   };
@@ -87,7 +87,10 @@ export default function RoomLobby() {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
                 {room.name}
               </h1>
-              <p className="text-gray-600 flex items-center gap-2"><Users className="w-4 h-4"/> {room.players.length} / {room.maxPlayers} players</p>
+              <p className="text-gray-600 flex items-center gap-2">
+                <Users className="w-4 h-4" /> {room.players.length} /{" "}
+                {room.maxPlayers} players
+              </p>
             </div>
           </div>
 
@@ -96,7 +99,11 @@ export default function RoomLobby() {
               <Share2 className="w-4 h-4" /> Copy link
             </Button>
             {isHost && (
-              <Button onClick={handleStart} disabled={room.players.length !== 2} className="bg-green-600 hover:bg-green-700 gap-2 disabled:opacity-60">
+              <Button
+                onClick={handleStart}
+                disabled={room.players.length !== 2}
+                className="bg-green-600 hover:bg-green-700 gap-2 disabled:opacity-60"
+              >
                 <Play className="w-4 h-4" /> Start game
               </Button>
             )}
@@ -108,9 +115,13 @@ export default function RoomLobby() {
             <CardTitle>Players</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-2 flex-wrap">
-            {room.players.map(p => (
-              <span key={p.id} className="px-3 py-1 rounded-full bg-white border flex items-center gap-2 shadow-sm">
-                {p.isHost && <Crown className="w-4 h-4 text-yellow-500" />} {p.name}
+            {room.players.map((p) => (
+              <span
+                key={p.id}
+                className="px-3 py-1 rounded-full bg-white border flex items-center gap-2 shadow-sm"
+              >
+                {p.isHost && <Crown className="w-4 h-4 text-yellow-500" />}{" "}
+                {p.name}
               </span>
             ))}
             {room.players.length === 0 && (
@@ -133,6 +144,21 @@ export default function RoomLobby() {
 
 function LogInIcon() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-log-in"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" x2="3" y1="12" y2="12"/></svg>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="lucide lucide-log-in"
+    >
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+      <polyline points="10 17 15 12 10 7" />
+      <line x1="15" x2="3" y1="12" y2="12" />
+    </svg>
   );
 }
