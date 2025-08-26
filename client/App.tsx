@@ -9,7 +9,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Lobby from "./pages/Lobby";
 import RoomLobby from "./pages/RoomLobby";
 import NotFound from "./pages/NotFound";
-import { ScrabbleGame } from "@/components/ScrabbleGame";
+import GamePage from "./pages/Game";
 
 const queryClient = new QueryClient();
 
