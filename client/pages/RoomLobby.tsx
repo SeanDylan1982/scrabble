@@ -53,8 +53,15 @@ export default function RoomLobby() {
   useEffect(() => {
     let mounted = true;
     const onVis = () => {
-      if (document.visibilityState === "visible") schedule(0);
-      else abortRef.current?.abort();
+      if (document.visibilityState === "visible") {
+        schedule(0);
+      } else {
+        try {
+          if (abortRef.current && !abortRef.current.signal.aborted) {
+            abortRef.current.abort();
+          }
+        } catch {}
+      }
     };
     document.addEventListener("visibilitychange", onVis);
     fetchRoom(false);
