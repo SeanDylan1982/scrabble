@@ -23,11 +23,13 @@ export default function RoomLobby() {
     const controller = new AbortController();
     try {
       if (!silent) setLoading(true);
-      const res = await fetch(`/api/lobby/rooms/${roomId}` , { signal: controller.signal });
+      const res = await fetch(`/api/lobby/rooms/${roomId}`, {
+        signal: controller.signal,
+      });
       const data = await res.json();
       if (data?.room) setRoom(data.room);
-    } catch {}
-    finally {
+    } catch {
+    } finally {
       if (!silent) setLoading(false);
     }
     return () => controller.abort();
