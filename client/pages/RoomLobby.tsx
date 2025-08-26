@@ -114,7 +114,7 @@ export default function RoomLobby() {
             <CardTitle>Players</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-2 flex-wrap">
-            {room.players.map((p) => (
+            {(room.players ?? []).map((p) => (
               <span
                 key={p.id}
                 className="px-3 py-1 rounded-full bg-white border flex items-center gap-2 shadow-sm"
