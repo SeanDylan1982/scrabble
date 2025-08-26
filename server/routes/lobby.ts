@@ -169,11 +169,25 @@ export const joinRoom: RequestHandler = async (req, res) => {
 };
 
 export const leaveRoom: RequestHandler = async (req, res) => {
-  const pool = getPool();
   const id = req.params.id;
   const body = req.body as LeaveRoomRequest;
   if (!body?.playerId)
     return res.status(400).json({ error: "Missing playerId" });
+
+  const pool = tryGetPool();
+  if (!pool) {
+    const room = memRooms.get(id);
+    if (!room) return res.json({ ok: true });
+    room.players = room.players.filter((p) => p.id !== body.playerId);
+    if (room.hostId === body.playerId) {
+      if (room.players.length === 0) memRooms.delete(id);
+      else {
+        room.hostId = room.players[0].id;
+        room.players[0].isHost = true;
+      }
+    }
+    return res.json({ room });
+  }
 
   await pool.query("delete from room_players where id=$1 and room_id=$2", [
     body.playerId,
