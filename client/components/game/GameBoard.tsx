@@ -1,5 +1,4 @@
 import React from 'react';
-import { useDrop } from 'react-dnd';
 import { BoardSquare } from './BoardSquare';
 import { BOARD_SIZE, PREMIUM_SQUARES } from '@/lib/scrabble/constants';
 import { PlacedTile, SelectedTile } from '@/lib/scrabble/types';
@@ -13,18 +12,17 @@ interface GameBoardProps {
 }
 
 export function GameBoard({ placedTiles, onTilePlaced, onTileRemoved, selectedTiles }: GameBoardProps) {
-  const [{ isOver }, drop] = useDrop({
-    accept: 'tile',
-    drop: (item: SelectedTile, monitor) => {
-      if (!monitor.didDrop()) {
-        // Handle dropping on the board generally
-        return;
-      }
-    },
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-    }),
-  });
+  const handleSquareClick = (row: number, col: number) => {
+    const placedTile = placedTiles.find(tile => tile.row === row && tile.col === col);
+    
+    if (placedTile) {
+      // Remove tile from board
+      onTileRemoved(row, col);
+    } else if (selectedTiles.length > 0) {
+      // Place first selected tile
+      onTilePlaced(row, col, selectedTiles[0]);
+    }
+  };
 
   const renderSquare = (row: number, col: number) => {
     const key = `${row}-${col}`;
@@ -38,20 +36,18 @@ export function GameBoard({ placedTiles, onTilePlaced, onTileRemoved, selectedTi
         col={col}
         placedTile={placedTile}
         premiumType={premiumType}
-        onTilePlaced={onTilePlaced}
-        onTileRemoved={onTileRemoved}
+        onSquareClick={handleSquareClick}
         isCenter={row === 7 && col === 7}
+        canPlaceTile={selectedTiles.length > 0 && !placedTile}
       />
     );
   };
 
   return (
     <div 
-      ref={drop}
       className={cn(
         "relative bg-emerald-900 p-4 rounded-2xl shadow-2xl",
-        "border-4 border-emerald-800",
-        isOver && "ring-4 ring-blue-400 ring-opacity-50"
+        "border-4 border-emerald-800"
       )}
       style={{
         backgroundImage: `
@@ -71,6 +67,13 @@ export function GameBoard({ placedTiles, onTilePlaced, onTileRemoved, selectedTi
       <div className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-700 rounded-full"></div>
       <div className="absolute -bottom-2 -left-2 w-6 h-6 bg-emerald-700 rounded-full"></div>
       <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-emerald-700 rounded-full"></div>
+      
+      {/* Instructions */}
+      {selectedTiles.length > 0 && (
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
+          Click on board to place "{selectedTiles[0].letter}"
+        </div>
+      )}
     </div>
   );
 }
