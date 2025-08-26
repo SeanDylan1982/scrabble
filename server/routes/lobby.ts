@@ -114,11 +114,21 @@ export const createRoom: RequestHandler = async (req, res) => {
 };
 
 export const joinRoom: RequestHandler = async (req, res) => {
-  const pool = getPool();
   const id = req.params.id;
   const body = req.body as JoinRoomRequest;
   if (!body?.playerName)
     return res.status(400).json({ error: "Missing playerName" });
+
+  const pool = tryGetPool();
+  if (!pool) {
+    const room = memRooms.get(id);
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+    if (room.status !== 'waiting') return res.status(400).json({ error: 'Game already started' });
+    if (room.players.length >= room.maxPlayers) return res.status(400).json({ error: 'Room is full' });
+    const player: LobbyPlayer = { id: uid(), name: body.playerName };
+    room.players.push(player);
+    return res.json({ room, player } as JoinRoomResponse);
+  }
 
   const { rows } = await pool.query("select * from rooms where id=$1", [id]);
   if (rows.length === 0)
