@@ -100,7 +100,7 @@ export default function RoomLobby() {
             {isHost && (
               <Button
                 onClick={handleStart}
-                disabled={room.players.length !== 2}
+                disabled={(room.players?.length ?? 0) !== 2}
                 className="bg-green-600 hover:bg-green-700 gap-2 disabled:opacity-60"
               >
                 <Play className="w-4 h-4" /> Start game
