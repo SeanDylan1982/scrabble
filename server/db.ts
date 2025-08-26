@@ -1,10 +1,19 @@
 import { Pool } from 'pg';
 
-const DATABASE_URL = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL || '';
+let _pool: Pool | null = null;
 
-export const pool = new Pool({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
+export function getPool(): Pool {
+  if (_pool) return _pool;
+  const raw = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
+  if (!raw) throw new Error('DATABASE_URL not set');
+  // Ensure postgres scheme and keep URL-encoded password
+  const conn = raw.replace(/^postgresql:\/\//, 'postgres://');
+  _pool = new Pool({ connectionString: conn, ssl: { rejectUnauthorized: false } });
+  return _pool;
+}
 
 export async function initDb() {
+  const pool = getPool();
   await pool.query(`
     create table if not exists rooms (
       id text primary key,
