@@ -20,6 +20,9 @@ import {
 export function createServer() {
   const app = express();
 
+  // Initialize database (tables if not exist)
+  initDb().catch((e) => console.error('DB init error', e));
+
   // Middleware
   app.use(cors());
   app.use(express.json());
