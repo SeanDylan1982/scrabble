@@ -18,22 +18,29 @@ export default function RoomLobby() {
 
   const isHost = room?.hostId === playerId;
 
-  const fetchRoom = async () => {
+  const fetchRoom = async (silent = false) => {
     if (!roomId) return;
+    const controller = new AbortController();
     try {
-      setLoading(true);
-      const res = await fetch(`/api/lobby/rooms/${roomId}`);
+      if (!silent) setLoading(true);
+      const res = await fetch(`/api/lobby/rooms/${roomId}` , { signal: controller.signal });
       const data = await res.json();
-      setRoom(data.room);
-    } finally {
-      setLoading(false);
+      if (data?.room) setRoom(data.room);
+    } catch {}
+    finally {
+      if (!silent) setLoading(false);
     }
+    return () => controller.abort();
   };
 
   useEffect(() => {
-    fetchRoom();
-    const interval = setInterval(fetchRoom, 3000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    fetchRoom(false);
+    const interval = setInterval(() => mounted && fetchRoom(true), 3000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
   }, [roomId]);
 
   const copyLink = async () => {
