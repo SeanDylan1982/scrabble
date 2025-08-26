@@ -123,7 +123,7 @@ export default function RoomLobby() {
                 {p.name}
               </span>
             ))}
-            {room.players.length === 0 && (
+            {(room.players?.length ?? 0) === 0 && (
               <div className="text-gray-600">No players yet.</div>
             )}
           </CardContent>
