@@ -241,11 +241,24 @@ export const leaveRoom: RequestHandler = async (req, res) => {
 };
 
 export const startRoom: RequestHandler = async (req, res) => {
-  const pool = getPool();
   const id = req.params.id;
   const body = req.body as StartRoomRequest;
   if (!body?.playerId)
     return res.status(400).json({ error: "Missing playerId" });
+
+  const pool = tryGetPool();
+  if (!pool) {
+    const room = memRooms.get(id);
+    if (!room) return res.status(404).json({ error: 'Room not found' });
+    if (room.hostId !== body.playerId)
+      return res.status(403).json({ error: 'Only host can start the game' });
+    if (room.players.length !== 2)
+      return res.status(400).json({ error: 'Exactly 2 players required to start' });
+    room.status = 'started';
+    try { initGameForRoom(room); } catch (e: any) { return res.status(400).json({ error: e.message }); }
+    return res.json({ room });
+  }
+
   const { rows } = await pool.query("select * from rooms where id=$1", [id]);
   if (rows.length === 0)
     return res.status(404).json({ error: "Room not found" });
