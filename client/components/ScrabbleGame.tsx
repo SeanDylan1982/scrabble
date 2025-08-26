@@ -7,16 +7,43 @@ import { GameControls } from './game/GameControls';
 import { useGameState } from '@/hooks/useGameState';
 import { cn } from '@/lib/utils';
 
-export function ScrabbleGame() {
-  const {
-    gameState,
-    currentPlayer,
-    players,
-    placedTiles,
-    selectedTiles,
-    gamePhase,
-    actions
-  } = useGameState();
+type Mode = 'solo' | 'server';
+
+interface Props { mode?: Mode; roomId?: string }
+
+export function ScrabbleGame({ mode = 'solo', roomId }: Props) {
+  const solo = useGameState();
+  const { useServerGame } = require('@/hooks/useServerGame');
+  const server = mode === 'server' && roomId ? useServerGame(roomId) : null;
+
+  const gameState = server ? {
+    tilesRemaining: server.state?.tilesRemaining || 0,
+    turnNumber: server.state?.turnNumber || 1,
+    lastWord: server.state?.lastWord,
+    lastScore: server.state?.lastScore,
+  } : solo.gameState;
+
+  const currentPlayer = server ? (server.me ? { id: server.me.id, name: server.me.name, score: server.me.score, rack: server.me.rack, isCurrentPlayer: server.currentPlayer?.id===server.me.id } : { id: 'me', name: 'You', score: 0, rack: [], isCurrentPlayer: false }) : solo.currentPlayer;
+
+  const players = server ? (server.state?.players.map(p => ({ id: p.id, name: p.name, score: p.score, rack: p.rack, isCurrentPlayer: server.state?.currentPlayerId===p.id })) || []) : solo.players;
+
+  const placedTiles = server ? server.placedTiles.map(pt => ({ row: pt.row, col: pt.col, tile: pt.tile })) : solo.placedTiles;
+  const selectedTiles = server ? server.selectedTiles : solo.selectedTiles;
+
+  const gamePhase = server ? ('playing' as const) : solo.gamePhase;
+
+  const actions = server ? {
+    startNewGame: () => {},
+    placeTile: (row:number, col:number) => server.actions.placeTile(row,col),
+    removeTile: (row:number, col:number) => server.actions.removeTile(row,col),
+    selectTile: (tile:any) => server.actions.selectTile(tile),
+    deselectTile: (tileId:string) => server.actions.deselectTile(tileId),
+    playWord: () => server.actions.playWord(),
+    shuffleRack: () => server.actions.shuffleRack(),
+    recallTiles: () => server.actions.recallTiles(),
+    passTurn: () => server.actions.passTurn(),
+    exchangeTiles: () => {},
+  } : solo.actions;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50">
