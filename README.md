@@ -74,6 +74,7 @@ create index if not exists idx_room_players_room on room_players(room_id);
 Base path: `/api`
 
 Lobby
+
 - GET `/lobby/rooms` → `{ rooms: LobbyRoom[] }`
 - GET `/lobby/rooms/:id` → `{ room: LobbyRoom }`
 - POST `/lobby/rooms` body `{ name, playerName, maxPlayers? }` → `{ room, player }`
@@ -82,16 +83,17 @@ Lobby
 - POST `/lobby/rooms/:id/start` body `{ playerId }` → `{ room }` (requires exactly 2 players; host only)
 
 Game (2‑player)
+
 - GET `/game/:id/state?playerId=…` → redacted state (only your rack)
 - POST `/game/:id/move` body `{ playerId, placements: [{ row, col, tileId, letter? }] }` → `{ ok }`
 - POST `/game/:id/pass` body `{ playerId }` → `{ ok }`
 
 ## Usage Flow
 
-1) Open homepage → enter your name → Create room → share link.
-2) Second player joins room → host presses Start → both are redirected to game.
-3) Current player selects tiles from rack, clicks squares to place, then “Play Word”.
-4) Draw tiles, turn passes to opponent. Pass/Recall/Shuffle as needed.
+1. Open homepage → enter your name → Create room → share link.
+2. Second player joins room → host presses Start → both are redirected to game.
+3. Current player selects tiles from rack, clicks squares to place, then “Play Word”.
+4. Draw tiles, turn passes to opponent. Pass/Recall/Shuffle as needed.
 
 Solo testing: `/game/solo` (local state).
 
@@ -106,7 +108,7 @@ Solo testing: `/game/solo` (local state).
 ## Deployment
 
 - Vercel or Netlify are recommended. Ensure SUPABASE_DB_URL is set in the platform’s env settings.
-- On Builder.io, you can connect providers via MCP: 
+- On Builder.io, you can connect providers via MCP:
   - Connect Vercel or Netlify in [Open MCP popover](#open-mcp-popover) and deploy.
 
 ## Troubleshooting
