@@ -1,5 +1,2 @@
-import { ScrabbleGame } from "@/components/ScrabbleGame";
-
-export default function Index() {
-  return <ScrabbleGame />;
-}
+import Lobby from "./Lobby";
+export default Lobby;
