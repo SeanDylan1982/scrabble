@@ -96,7 +96,7 @@ export default function RoomLobby() {
               <Share2 className="w-4 h-4" /> Copy link
             </Button>
             {isHost && (
-              <Button onClick={handleStart} className="bg-green-600 hover:bg-green-700 gap-2">
+              <Button onClick={handleStart} disabled={room.players.length !== 2} className="bg-green-600 hover:bg-green-700 gap-2 disabled:opacity-60">
                 <Play className="w-4 h-4" /> Start game
               </Button>
             )}
