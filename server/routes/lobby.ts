@@ -18,6 +18,8 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+const memRooms = new Map<string, LobbyRoom>();
+
 export const listRooms: RequestHandler = async (_req, res) => {
   const pool = getPool();
   const { rows } = await pool.query(
