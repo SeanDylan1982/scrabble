@@ -1,7 +1,6 @@
 import React from 'react';
-import { useDrop } from 'react-dnd';
 import { TileComponent } from './TileComponent';
-import { PlacedTile, SelectedTile, PremiumType } from '@/lib/scrabble/types';
+import { PlacedTile, PremiumType } from '@/lib/scrabble/types';
 import { cn } from '@/lib/utils';
 
 interface BoardSquareProps {
@@ -9,9 +8,9 @@ interface BoardSquareProps {
   col: number;
   placedTile?: PlacedTile;
   premiumType?: PremiumType;
-  onTilePlaced: (row: number, col: number, tile: SelectedTile) => void;
-  onTileRemoved: (row: number, col: number) => void;
+  onSquareClick: (row: number, col: number) => void;
   isCenter: boolean;
+  canPlaceTile: boolean;
 }
 
 export function BoardSquare({ 
@@ -19,24 +18,10 @@ export function BoardSquare({
   col, 
   placedTile, 
   premiumType, 
-  onTilePlaced, 
-  onTileRemoved,
-  isCenter 
+  onSquareClick,
+  isCenter,
+  canPlaceTile
 }: BoardSquareProps) {
-  const [{ isOver, canDrop }, drop] = useDrop({
-    accept: 'tile',
-    drop: (item: SelectedTile) => {
-      if (!placedTile) {
-        onTilePlaced(row, col, item);
-      }
-    },
-    canDrop: () => !placedTile,
-    collect: (monitor) => ({
-      isOver: !!monitor.isOver(),
-      canDrop: !!monitor.canDrop(),
-    }),
-  });
-
   const getPremiumStyle = () => {
     switch (premiumType) {
       case 'TW':
@@ -71,20 +56,19 @@ export function BoardSquare({
 
   return (
     <div
-      ref={drop}
+      onClick={() => onSquareClick(row, col)}
       className={cn(
         "relative w-8 h-8 border-2 flex items-center justify-center text-xs font-bold",
         "transition-all duration-200 cursor-pointer",
         getPremiumStyle(),
-        isOver && canDrop && "ring-2 ring-blue-400 ring-opacity-75 scale-105",
-        isOver && !canDrop && "ring-2 ring-red-400 ring-opacity-75"
+        canPlaceTile && "ring-2 ring-blue-400 ring-opacity-75 scale-105 hover:scale-110",
+        placedTile && "cursor-default"
       )}
     >
       {placedTile ? (
         <TileComponent
           tile={placedTile.tile}
           isPlaced={true}
-          onClick={() => onTileRemoved(row, col)}
         />
       ) : (
         <div className="text-center leading-none whitespace-pre-line">
