@@ -50,7 +50,7 @@ export const createRoom: RequestHandler = (req, res) => {
     createdAt: nowIso(),
     players: [player],
     hostId: playerId,
-    maxPlayers: Math.max(2, Math.min(body.maxPlayers ?? 4, 8)),
+    maxPlayers: Math.max(2, Math.min(body.maxPlayers ?? 2, 8)),
   };
 
   rooms.set(roomId, room);
