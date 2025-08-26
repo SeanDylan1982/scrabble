@@ -18,30 +18,49 @@ export default function RoomLobby() {
 
   const isHost = room?.hostId === playerId;
 
+  const pollDelayRef = useRef(3000);
+  const timerRef = useRef<number | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+
+  const schedule = (delay: number) => {
+    if (timerRef.current) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => void fetchRoom(true), delay);
+  };
+
   const fetchRoom = async (silent = false) => {
-    if (!roomId) return;
+    if (!roomId || document.visibilityState === 'hidden') return;
+    abortRef.current?.abort();
     const controller = new AbortController();
+    abortRef.current = controller;
     try {
       if (!silent) setLoading(true);
-      const res = await fetch(`/api/lobby/rooms/${roomId}`, {
-        signal: controller.signal,
-      });
+      const res = await fetch(`/api/lobby/rooms/${roomId}`, { signal: controller.signal });
+      if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       if (data?.room) setRoom(data.room);
+      pollDelayRef.current = 3000;
     } catch {
+      // Backoff on network/server errors to avoid hammering and FullStory noise
+      pollDelayRef.current = Math.min(pollDelayRef.current * 2, 30000);
     } finally {
       if (!silent) setLoading(false);
+      schedule(pollDelayRef.current);
     }
-    return () => controller.abort();
   };
 
   useEffect(() => {
     let mounted = true;
+    const onVis = () => {
+      if (document.visibilityState === 'visible') schedule(0);
+      else abortRef.current?.abort();
+    };
+    document.addEventListener('visibilitychange', onVis);
     fetchRoom(false);
-    const interval = setInterval(() => mounted && fetchRoom(true), 3000);
     return () => {
       mounted = false;
-      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVis);
+      abortRef.current?.abort();
+      if (timerRef.current) window.clearTimeout(timerRef.current);
     };
   }, [roomId]);
 
