@@ -11,12 +11,7 @@ import {
   StartRoomRequest,
 } from "@shared/api";
 
-// In-memory lobby store
-const rooms = new Map<string, LobbyRoom>();
-
-function uid() {
-  return Math.random().toString(36).slice(2, 10);
-}
+import { pool, uid } from "../db";
 
 function nowIso() {
   return new Date().toISOString();
