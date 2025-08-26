@@ -76,7 +76,6 @@ export const getRoom: RequestHandler = async (req, res) => {
 };
 
 export const createRoom: RequestHandler = async (req, res) => {
-  const pool = getPool();
   const body = req.body as CreateRoomRequest;
   if (!body?.name || !body?.playerName)
     return res.status(400).json({ error: "Missing name or playerName" });
@@ -85,20 +84,7 @@ export const createRoom: RequestHandler = async (req, res) => {
   const playerId = uid();
   const maxPlayers = Math.max(2, Math.min(body.maxPlayers ?? 2, 8));
 
-  await pool.query(
-    "insert into rooms(id, name, status, host_id, max_players) values ($1,$2,$3,$4,$5)",
-    [roomId, body.name.trim().slice(0, 40), "waiting", playerId, maxPlayers],
-  );
-  await pool.query(
-    "insert into room_players(id, room_id, name, is_host) values ($1,$2,$3,$4)",
-    [playerId, roomId, body.playerName, true],
-  );
-
-  const player: LobbyPlayer = {
-    id: playerId,
-    name: body.playerName,
-    isHost: true,
-  };
+  const player: LobbyPlayer = { id: playerId, name: body.playerName, isHost: true };
   const room: LobbyRoom = {
     id: roomId,
     name: body.name.trim().slice(0, 40),
@@ -108,6 +94,20 @@ export const createRoom: RequestHandler = async (req, res) => {
     hostId: playerId,
     maxPlayers,
   };
+
+  const pool = tryGetPool();
+  if (!pool) {
+    memRooms.set(roomId, room);
+  } else {
+    await pool.query(
+      "insert into rooms(id, name, status, host_id, max_players) values ($1,$2,$3,$4,$5)",
+      [roomId, room.name, "waiting", playerId, maxPlayers],
+    );
+    await pool.query(
+      "insert into room_players(id, room_id, name, is_host) values ($1,$2,$3,$4)",
+      [playerId, roomId, body.playerName, true],
+    );
+  }
 
   const response: CreateRoomResponse = { room, player };
   res.status(201).json(response);
