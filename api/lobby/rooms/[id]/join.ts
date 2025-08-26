@@ -1,7 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { joinRoom } from '../../../../server/routes/lobby';
+import { ensureDbInitialized } from '../../../_init-db';
 
-export default function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  await ensureDbInitialized();
   if (req.method === 'POST') {
     // Extract id from query params for Vercel's dynamic routing
     req.params = { id: req.query.id as string };
