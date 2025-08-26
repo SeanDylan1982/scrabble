@@ -20,5 +20,13 @@ export function createServer() {
 
   app.get("/api/demo", handleDemo);
 
+  // Lobby API
+  app.get("/api/lobby/rooms", listRooms);
+  app.get("/api/lobby/rooms/:id", getRoom);
+  app.post("/api/lobby/rooms", createRoom);
+  app.post("/api/lobby/rooms/:id/join", joinRoom);
+  app.post("/api/lobby/rooms/:id/leave", leaveRoom);
+  app.post("/api/lobby/rooms/:id/start", startRoom);
+
   return app;
 }
