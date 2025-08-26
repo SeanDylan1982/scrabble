@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { listRooms, createRoom, joinRoom, leaveRoom, startRoom, getRoom } from "./routes/lobby";
+import { getGameStateHandler, playMoveHandler, passTurnHandler } from "./routes/game";
 
 export function createServer() {
   const app = express();
@@ -27,6 +28,11 @@ export function createServer() {
   app.post("/api/lobby/rooms/:id/join", joinRoom);
   app.post("/api/lobby/rooms/:id/leave", leaveRoom);
   app.post("/api/lobby/rooms/:id/start", startRoom);
+
+  // Game API
+  app.get("/api/game/:id/state", getGameStateHandler);
+  app.post("/api/game/:id/move", playMoveHandler);
+  app.post("/api/game/:id/pass", passTurnHandler);
 
   return app;
 }
