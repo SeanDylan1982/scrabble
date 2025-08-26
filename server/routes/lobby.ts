@@ -11,7 +11,7 @@ import {
   StartRoomRequest,
 } from "@shared/api";
 
-import { getPool, uid } from "../db";
+import { getPool, tryGetPool, uid } from "../db";
 import { initGameForRoom } from "./game";
 
 function nowIso() {
