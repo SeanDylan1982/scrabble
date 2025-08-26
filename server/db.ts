@@ -8,7 +8,10 @@ export function tryGetPool(): Pool | null {
     const raw = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
     if (!raw) return null;
     const conn = raw.replace(/^postgresql:\/\//, "postgres://");
-    _pool = new Pool({ connectionString: conn, ssl: { rejectUnauthorized: false } });
+    _pool = new Pool({
+      connectionString: conn,
+      ssl: { rejectUnauthorized: false },
+    });
     return _pool;
   } catch {
     return null;

@@ -88,7 +88,8 @@ export default function RoomLobby() {
                 {room.name}
               </h1>
               <p className="text-gray-600 flex items-center gap-2">
-                <Users className="w-4 h-4" /> {(room.players?.length ?? 0)} / {room.maxPlayers} players
+                <Users className="w-4 h-4" /> {room.players?.length ?? 0} /{" "}
+                {room.maxPlayers} players
               </p>
             </div>
           </div>

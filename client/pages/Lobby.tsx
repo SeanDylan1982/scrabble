@@ -176,7 +176,7 @@ export default function Lobby() {
                           </div>
                           <div className="text-sm text-gray-600 flex items-center gap-2 mt-1">
                             <Users className="w-4 h-4" />
-                            {(room.players?.length ?? 0)} / {room.maxPlayers}
+                            {room.players?.length ?? 0} / {room.maxPlayers}
                           </div>
                         </div>
                         <div className="flex gap-2">

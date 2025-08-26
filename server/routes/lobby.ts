@@ -23,7 +23,9 @@ const memRooms = new Map<string, LobbyRoom>();
 export const listRooms: RequestHandler = async (_req, res) => {
   const pool = tryGetPool();
   if (!pool) {
-    const rooms = Array.from(memRooms.values()).sort((a,b)=>a.createdAt < b.createdAt ? 1 : -1);
+    const rooms = Array.from(memRooms.values()).sort((a, b) =>
+      a.createdAt < b.createdAt ? 1 : -1,
+    );
     return res.json({ rooms } as LobbyListResponse);
   }
   const { rows } = await pool.query(
@@ -50,7 +52,7 @@ export const getRoom: RequestHandler = async (req, res) => {
   const pool = tryGetPool();
   if (!pool) {
     const room = memRooms.get(id);
-    if (!room) return res.status(404).json({ error: 'Room not found' });
+    if (!room) return res.status(404).json({ error: "Room not found" });
     return res.json({ room });
   }
   const { rows } = await pool.query(
@@ -84,7 +86,11 @@ export const createRoom: RequestHandler = async (req, res) => {
   const playerId = uid();
   const maxPlayers = Math.max(2, Math.min(body.maxPlayers ?? 2, 8));
 
-  const player: LobbyPlayer = { id: playerId, name: body.playerName, isHost: true };
+  const player: LobbyPlayer = {
+    id: playerId,
+    name: body.playerName,
+    isHost: true,
+  };
   const room: LobbyRoom = {
     id: roomId,
     name: body.name.trim().slice(0, 40),
@@ -122,9 +128,11 @@ export const joinRoom: RequestHandler = async (req, res) => {
   const pool = tryGetPool();
   if (!pool) {
     const room = memRooms.get(id);
-    if (!room) return res.status(404).json({ error: 'Room not found' });
-    if (room.status !== 'waiting') return res.status(400).json({ error: 'Game already started' });
-    if (room.players.length >= room.maxPlayers) return res.status(400).json({ error: 'Room is full' });
+    if (!room) return res.status(404).json({ error: "Room not found" });
+    if (room.status !== "waiting")
+      return res.status(400).json({ error: "Game already started" });
+    if (room.players.length >= room.maxPlayers)
+      return res.status(400).json({ error: "Room is full" });
     const player: LobbyPlayer = { id: uid(), name: body.playerName };
     room.players.push(player);
     return res.json({ room, player } as JoinRoomResponse);
@@ -249,13 +257,19 @@ export const startRoom: RequestHandler = async (req, res) => {
   const pool = tryGetPool();
   if (!pool) {
     const room = memRooms.get(id);
-    if (!room) return res.status(404).json({ error: 'Room not found' });
+    if (!room) return res.status(404).json({ error: "Room not found" });
     if (room.hostId !== body.playerId)
-      return res.status(403).json({ error: 'Only host can start the game' });
+      return res.status(403).json({ error: "Only host can start the game" });
     if (room.players.length !== 2)
-      return res.status(400).json({ error: 'Exactly 2 players required to start' });
-    room.status = 'started';
-    try { initGameForRoom(room); } catch (e: any) { return res.status(400).json({ error: e.message }); }
+      return res
+        .status(400)
+        .json({ error: "Exactly 2 players required to start" });
+    room.status = "started";
+    try {
+      initGameForRoom(room);
+    } catch (e: any) {
+      return res.status(400).json({ error: e.message });
+    }
     return res.json({ room });
   }
 
