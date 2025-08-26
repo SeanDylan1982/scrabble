@@ -1,5 +1,4 @@
 import React from 'react';
-import { useDrag } from 'react-dnd';
 import { Tile } from '@/lib/scrabble/types';
 import { cn } from '@/lib/utils';
 
@@ -20,15 +19,6 @@ export function TileComponent({
   onDoubleClick,
   className
 }: TileComponentProps) {
-  const [{ isDragging }, drag] = useDrag({
-    type: 'tile',
-    item: { ...tile, fromRack: !isPlaced },
-    canDrag: !isPlaced,
-    collect: (monitor) => ({
-      isDragging: !!monitor.isDragging(),
-    }),
-  });
-
   const getLetterDisplay = () => {
     if (tile.isBlank && tile.letter !== '?') {
       return tile.letter.toLowerCase();
@@ -38,7 +28,6 @@ export function TileComponent({
 
   return (
     <div
-      ref={drag}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       className={cn(
@@ -50,13 +39,9 @@ export function TileComponent({
         !isPlaced && "hover:rotate-1",
         isSelected && "ring-2 ring-blue-400 ring-opacity-75 scale-105",
         isPlaced && "cursor-default scale-90",
-        isDragging && "opacity-50 rotate-12 scale-110",
         tile.isBlank && "bg-gradient-to-br from-gray-100 to-gray-200 border-gray-300",
         className
       )}
-      style={{
-        opacity: isDragging ? 0.5 : 1,
-      }}
     >
       {/* Letter */}
       <span className={cn(
