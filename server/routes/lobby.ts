@@ -208,7 +208,7 @@ export const leaveRoom: RequestHandler = async (req, res) => {
     name: r.name,
     status: r.status,
     createdAt: r.created_at,
-    players: r.players,
+    players: r.players ?? [],
     hostId: r.host_id,
     maxPlayers: r.max_players,
   };
