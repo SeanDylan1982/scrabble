@@ -1,4 +1,3 @@
-import { useEffect, useMemo, useState } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { LobbyRoom } from "@shared/api";
