@@ -2,17 +2,23 @@ import { Pool } from "pg";
 
 let _pool: Pool | null = null;
 
+export function tryGetPool(): Pool | null {
+  try {
+    if (_pool) return _pool;
+    const raw = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
+    if (!raw) return null;
+    const conn = raw.replace(/^postgresql:\/\//, "postgres://");
+    _pool = new Pool({ connectionString: conn, ssl: { rejectUnauthorized: false } });
+    return _pool;
+  } catch {
+    return null;
+  }
+}
+
 export function getPool(): Pool {
-  if (_pool) return _pool;
-  const raw = process.env.SUPABASE_DB_URL || process.env.DATABASE_URL;
-  if (!raw) throw new Error("DATABASE_URL not set");
-  // Ensure postgres scheme and keep URL-encoded password
-  const conn = raw.replace(/^postgresql:\/\//, "postgres://");
-  _pool = new Pool({
-    connectionString: conn,
-    ssl: { rejectUnauthorized: false },
-  });
-  return _pool;
+  const pool = tryGetPool();
+  if (!pool) throw new Error("DATABASE_URL not set");
+  return pool;
 }
 
 export async function initDb() {
