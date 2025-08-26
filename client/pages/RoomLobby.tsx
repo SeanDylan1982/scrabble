@@ -41,9 +41,13 @@ export default function RoomLobby() {
       const data = await res.json();
       if (data?.room) setRoom(data.room);
       pollDelayRef.current = 3000;
-    } catch {
-      // Backoff on network/server errors to avoid hammering and FullStory noise
-      pollDelayRef.current = Math.min(pollDelayRef.current * 2, 30000);
+    } catch (err: any) {
+      if (err?.name === "AbortError") {
+        // ignored
+      } else {
+        // Backoff on network/server errors to avoid hammering and FullStory noise
+        pollDelayRef.current = Math.min(pollDelayRef.current * 2, 30000);
+      }
     } finally {
       if (!silent) setLoading(false);
       schedule(pollDelayRef.current);
