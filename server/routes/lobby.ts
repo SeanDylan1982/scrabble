@@ -27,7 +27,7 @@ export const listRooms: RequestHandler = async (_req, res) => {
     return res.json({ rooms } as LobbyListResponse);
   }
   const { rows } = await pool.query(
-    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]') as players
+    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]'::json) as players
      from rooms r left join room_players p on p.room_id = r.id
      group by r.id
      order by r.created_at desc`,
@@ -49,7 +49,7 @@ export const getRoom: RequestHandler = async (req, res) => {
   const pool = getPool();
   const id = req.params.id;
   const { rows } = await pool.query(
-    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]') as players
+    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]'::json) as players
      from rooms r left join room_players p on p.room_id = r.id
      where r.id = $1
      group by r.id`,
@@ -135,7 +135,7 @@ export const joinRoom: RequestHandler = async (req, res) => {
   );
 
   const { rows: r2 } = await pool.query(
-    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]') as players
+    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]'::json) as players
      from rooms r left join room_players p on p.room_id = r.id where r.id=$1 group by r.id`,
     [id],
   );
@@ -192,7 +192,7 @@ export const leaveRoom: RequestHandler = async (req, res) => {
 
   // Return updated room
   const { rows } = await pool.query(
-    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]') as players
+    `select r.*, coalesce(json_agg(jsonb_build_object('id', p.id, 'name', p.name, 'isHost', p.is_host)) filter (where p.id is not null), '[]'::json) as players
      from rooms r left join room_players p on p.room_id = r.id where r.id=$1 group by r.id`,
     [id],
   );
