@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { supabase } from "../lib/supabase";
 
 export interface ServerTile {
   id: string;
@@ -56,9 +57,25 @@ export function useServerGame(roomId: string) {
 
   useEffect(() => {
     fetchState();
-    const i = setInterval(fetchState, 1500);
-    return () => clearInterval(i);
-  }, [fetchState]);
+
+    const channel = supabase.channel(`room-${roomId}`);
+
+    channel
+      .on("broadcast", { event: "state_change" }, () => {
+        fetchState();
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          console.log("Subscribed to room channel");
+        } else if (status === "CHANNEL_ERROR") {
+          setError("Could not subscribe to real-time updates");
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchState, roomId]);
 
   const currentPlayer = useMemo(
     () => state?.players.find((p) => p.id === state?.currentPlayerId),

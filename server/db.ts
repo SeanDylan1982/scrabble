@@ -1,6 +1,8 @@
 import { Pool } from "pg";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 let _pool: Pool | null = null;
+let _supabase: SupabaseClient | null = null;
 
 export function tryGetPool(): Pool | null {
   try {
@@ -22,6 +24,15 @@ export function getPool(): Pool {
   const pool = tryGetPool();
   if (!pool) throw new Error("DATABASE_URL not set");
   return pool;
+}
+
+export function getSupabase(): SupabaseClient {
+  if (_supabase) return _supabase;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY;
+  if (!url || !key) throw new Error("Supabase credentials not set");
+  _supabase = createClient(url, key);
+  return _supabase;
 }
 
 export async function initDb() {

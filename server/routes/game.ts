@@ -1,5 +1,6 @@
 import { RequestHandler } from "express";
 import { LobbyRoom, LobbyPlayer } from "@shared/api";
+import { getSupabase } from "../db";
 
 // Types for server-side game state
 interface Tile {
@@ -608,6 +609,14 @@ export const playMoveHandler: RequestHandler = (req, res) => {
   game.lastWord = words[0]?.word;
   game.lastScore = totalScore;
 
+  const supabase = getSupabase();
+  const channel = supabase.channel(`room-${roomId}`);
+  channel.send({
+    type: "broadcast",
+    event: "state_change",
+    payload: {},
+  });
+
   return res.json({ ok: true });
 };
 
@@ -625,5 +634,14 @@ export const passTurnHandler: RequestHandler = (req, res) => {
   const other = game.players.find((p) => p.id !== playerId)!;
   game.currentPlayerId = other.id;
   game.turnNumber += 1;
+
+  const supabase = getSupabase();
+  const channel = supabase.channel(`room-${roomId}`);
+  channel.send({
+    type: "broadcast",
+    event: "state_change",
+    payload: {},
+  });
+
   res.json({ ok: true });
 };
