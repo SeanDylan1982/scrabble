@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "buildCommand": "npm run build:client",
+  "buildCommand": "pnpm build",
   "outputDirectory": "dist/spa",
   "env": {
     "NODE_ENV": "production"
